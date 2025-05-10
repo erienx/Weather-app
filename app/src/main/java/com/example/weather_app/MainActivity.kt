@@ -1,9 +1,9 @@
 package com.example.weather_app
 
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -14,14 +14,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.weather_app.components.BottomNavigationBar
 import com.example.weather_app.components.FavouritesScreen
-import com.example.weather_app.components.Screen
 import com.example.weather_app.components.SearchScreen
 import com.example.weather_app.components.WeatherScreen
+import com.example.weather_app.util.Screen
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             Content()
         }
@@ -51,8 +51,8 @@ private fun Content() {
     MainScreen()
 }
 
-@Composable
 @Preview(showBackground = true)
-fun Preview(){
+@Composable
+fun Preview() {
     Content()
 }
