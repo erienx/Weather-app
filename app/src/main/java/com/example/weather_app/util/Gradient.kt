@@ -5,10 +5,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-val gradientColors = listOf(
+val mainGradientColors = listOf(
     Color(0xFF00BFFF),
     Color(0xFF1E90FF),
     Color(0xFF4682B4)
+)
+
+val bottomNavGradientColors = listOf(
+    Color(0xFF2C3E50),
+    Color(0xFF34495E),
+    Color(0xFF22313F)
 )
 
 @Composable
