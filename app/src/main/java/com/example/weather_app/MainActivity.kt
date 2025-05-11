@@ -9,9 +9,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.weather_app.components.BottomNavigationBar
 import com.example.weather_app.components.FavouritesScreen
 import com.example.weather_app.components.SearchScreen
@@ -31,17 +33,28 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    val items = listOf(Screen.Search, Screen.Weather, Screen.Favourites)
+    val screens = listOf(Screen.Search, Screen.Weather, Screen.Favourites)
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController, items = items)
+            BottomNavigationBar(navController = navController, items = screens)
         }
     ) { innerPadding ->
         NavHost(navController, startDestination = Screen.Search.route, Modifier.padding(innerPadding)) {
-            composable(Screen.Search.route) { SearchScreen() }
-            composable(Screen.Weather.route) { WeatherScreen() }
-            composable(Screen.Favourites.route) { FavouritesScreen() }
+            composable(Screen.Search.route) {
+                SearchScreen(navController)
+            }
+            composable(Screen.Weather.route) {
+                WeatherScreen()
+            }
+            composable(route = "weather/{cityName}", arguments = listOf(navArgument("cityName") { type = NavType.StringType }))
+            { backStackEntry ->
+                val city = backStackEntry.arguments?.getString("cityName")
+                WeatherScreen(city.toString())
+            }
+            composable(Screen.Favourites.route) {
+                FavouritesScreen()
+            }
         }
     }
 }
@@ -51,8 +64,8 @@ private fun Content() {
     MainScreen()
 }
 
-@Preview(showBackground = true)
 @Composable
-fun Preview() {
+@Preview(showBackground = true)
+fun Preview(){
     Content()
 }

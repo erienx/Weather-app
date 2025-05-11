@@ -23,19 +23,14 @@ import com.example.weather_app.api.WeatherUIState
 import com.example.weather_app.api.WeatherView
 import com.example.weather_app.util.gradientBackgroundBrush
 import com.example.weather_app.util.mainGradientColors
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
 @Composable
-fun WeatherScreen() {
-    val city = "lodz"
+fun WeatherScreen(city: String = "lodz") {
     val apiKey = "0a7cf1e7fd79dacb4e026a76d2f062ff"
 
     val viewModel: WeatherView = viewModel()
     val weatherState = viewModel.fetchStatus
 
-    LaunchedEffect(key1= Unit) {
+    LaunchedEffect(key1= city) {
         viewModel.fetchWeather(city, apiKey)
     }
 
@@ -45,7 +40,7 @@ fun WeatherScreen() {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.align(Alignment.Center))
             }
             is WeatherUIState.Error -> {
-                Column (horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
+                Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                     Text("Weather data fetch failed", color = Color.White, fontSize = 28.sp)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(weatherState.message, color=Color.White, fontSize = 16.sp)

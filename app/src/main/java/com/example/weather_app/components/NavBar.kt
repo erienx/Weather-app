@@ -42,7 +42,7 @@ fun BottomNavigationBar(navController: NavController, items: List<Screen>) {
                         )
                     },
                     label = { Text(screen.title, color = Color.White) },
-                    selected = currentRoute == screen.route,
+                    selected = currentRoute?.startsWith(screen.route) == true,
                     onClick = {
                         if (currentRoute != screen.route) {
                             navController.navigate(screen.route) {
