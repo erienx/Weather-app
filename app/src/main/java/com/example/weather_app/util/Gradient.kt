@@ -4,17 +4,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import com.example.weather_app.ui.theme.DarkBlue1
+import com.example.weather_app.ui.theme.DarkBlue2
+import com.example.weather_app.ui.theme.DarkBlue3
+import com.example.weather_app.ui.theme.DeepBlue1
+import com.example.weather_app.ui.theme.DeepBlue2
+import com.example.weather_app.ui.theme.DeepBlue3
 
 val mainGradientColors = listOf(
-    Color(0xFF00BFFF),
-    Color(0xFF1E90FF),
-    Color(0xFF4682B4)
+    DarkBlue1,
+    DarkBlue2,
+    DarkBlue3
+)
+val cardGradientColors = listOf(
+    DeepBlue1,
+    DeepBlue2,
+    DeepBlue1
 )
 
 val bottomNavGradientColors = listOf(
     Color(0xFF2C3E50),
     Color(0xFF34495E),
-    Color(0xFF22313F)
+    Color(0xFF22313F),
 )
 
 @Composable
