@@ -34,3 +34,4 @@ fun WeatherDetails(
         Text(unit, color = Color.White, fontSize = 14.sp)
     }
 }
+

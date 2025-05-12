@@ -1,9 +1,9 @@
 package com.example.weather_app.components
 
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,30 +45,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.weather_app.util.Screen
+import com.example.weather_app.util.addCityToSearchHistory
+import com.example.weather_app.util.addFavourite
+import com.example.weather_app.util.getFavourites
+import com.example.weather_app.util.getSearchHistory
 import com.example.weather_app.util.gradientBackgroundBrush
 import com.example.weather_app.util.mainGradientColors
-
-private const val PREF_NAME = "weather_prefs"
-private const val KEY_SEARCH_HISTORY = "search_history"
-
-fun getSearchHistory(context: Context): List<String> {
-    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    return prefs.getStringSet(KEY_SEARCH_HISTORY, emptySet())?.toList() ?: emptyList()
-}
-
-fun saveSearchHistory(context: Context, history: List<String>) {
-    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    prefs.edit().putStringSet(KEY_SEARCH_HISTORY, history.toSet()).apply()
-}
-
-fun addCityToSearchHistory(context: Context, city: String): List<String> {
-    val currentHistory = getSearchHistory(context).toMutableList()
-    currentHistory.remove(city)
-    currentHistory.add(0, city)
-    val trimmed = currentHistory.take(10)
-    saveSearchHistory(context, trimmed)
-    return trimmed
-}
+import com.example.weather_app.util.removeFavourite
+import com.example.weather_app.util.toast
 
 
 @Composable
@@ -85,18 +71,28 @@ fun SearchScreen(navController: NavController) {
     }
 
 
-    Box(modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors))) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(brush = gradientBackgroundBrush(colors = mainGradientColors))) {
         Column( modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally)
         {
-            Text( "Search for a City",  color = Color.White,  fontSize = 24.sp,  fontWeight = FontWeight.Bold,  modifier = Modifier.padding(bottom = 24.dp))
+//        Text("Hello Mati!!!",color = Color.Red, fontSize = 94.sp)
+//            Spacer(modifier = Modifier.height(16.dp))
+//            Text("Miłego dnia!!!",color = Color.Magenta, fontSize = 48.sp)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text( "Search for a City",  color = Color.White,  fontSize = 24.sp,  fontWeight = FontWeight.Bold,  modifier = Modifier.padding(bottom = 14.dp))
 
             SearchBar(onSearch = { city -> redirectToCity(city)}
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
             if (searchHistory.isNotEmpty()) {
                 Text( "Recent searches",  color = Color.White,  fontSize = 18.sp,  fontWeight = FontWeight.SemiBold,  modifier = Modifier.padding(bottom = 8.dp))
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 LazyColumn {
                     items(searchHistory) { city ->
@@ -168,15 +164,44 @@ fun SearchBar(onSearch: (String) -> Unit) {
 
 @Composable
 fun SearchHistoryItem(city: String, onClick: () -> Unit) {
+    val context = LocalContext.current
+    var favourites  by remember {   mutableStateOf(getFavourites(context))}
+    val isCityInFavourites = favourites.contains(city)
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.1f)).clickable { onClick() }.padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White.copy(alpha = 0.1f))
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween
     ) {
-
-        Icon(imageVector = Icons.Default.DateRange, contentDescription = "History", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(24.dp))
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Text(text = city, color = Color.White, fontSize = 16.sp)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon( imageVector = Icons.Default.DateRange,  contentDescription = "History",  tint = Color.White.copy(alpha = 0.8f),  modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = city, color = Color.White, fontSize = 16.sp)
+        }
+        Button(
+            onClick = {
+                if (isCityInFavourites) {
+                    removeFavourite(context,city)
+                    context.toast("Removed ${city.capitalize()} from favourites")
+                }
+                else{
+                    addFavourite(context,city)
+                    context.toast("Added ${city.capitalize()} to favourites")
+                }
+                favourites = getFavourites(context)
+            },
+            colors = ButtonDefaults.buttonColors(Color.Transparent)
+        ) {
+            Icon(
+                imageVector = if(isCityInFavourites) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "add to favourites",
+                tint = Color.White,
+                modifier = Modifier.size(30.dp)
+            )
+        }
     }
 }

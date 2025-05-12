@@ -53,7 +53,7 @@ fun MainScreen() {
                 WeatherScreen(city.toString())
             }
             composable(Screen.Favourites.route) {
-                FavouritesScreen()
+                FavouritesScreen(navController)
             }
         }
     }
