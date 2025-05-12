@@ -129,7 +129,7 @@ fun ForecastDayRow(forecast: ForecastData) {
             AsyncImage(model = ImageRequest.Builder(LocalContext.current).data(iconUrl).crossfade(true).build(),
                 contentDescription = "Weather Icon", modifier = Modifier.size(40.dp), contentScale = ContentScale.Fit)
 
-            Text(text = "${forecast.maxTemp.toInt()}° ${forecast.minTemp.toInt()}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(text = "${forecast.maxTemp.toInt()}° ${forecast.minTemp.toInt()}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.width(60.dp))
         }
     }
 }
