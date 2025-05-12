@@ -1,12 +1,5 @@
-save data for current location on weather screen, replace on change, keep only 1
-
-if internet connection then fetch api data for favourites and last location
-
-if no interent then load data from memory for favourites/last location
-+ notify user about old data
-
-for tablet users, all the fragments should be on the screen at once
-
 menu:
 refresh info on user's request and every given time (configurated with shared pref)
 change units used (metric/imperial)
+
+for tablet users, all the fragments should be on the screen at once

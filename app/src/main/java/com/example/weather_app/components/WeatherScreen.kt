@@ -2,7 +2,6 @@ package com.example.weather_app.components
 
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapPosition.Center
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weather_app.api.WeatherUIState
 import com.example.weather_app.api.WeatherView
+import com.example.weather_app.util.API_KEY
+import com.example.weather_app.util.getFavourites
 import com.example.weather_app.util.getLastViewedData
 import com.example.weather_app.util.gradientBackgroundBrush
 import com.example.weather_app.util.mainGradientColors
@@ -31,7 +32,7 @@ import com.example.weather_app.util.saveLastViewedData
 
 @Composable
 fun WeatherScreen(city: String? = null) {
-    val apiKey = "0a7cf1e7fd79dacb4e026a76d2f062ff"
+    val apiKey = API_KEY
     val context = LocalContext.current
     var cityToFetch = city
 
@@ -52,12 +53,18 @@ fun WeatherScreen(city: String? = null) {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.align(Alignment.Center))
             }
             is WeatherUIState.Error -> {
-                val offlineData = getLastViewedData(context)
+                var offlineData = getLastViewedData(context)
+                if (!offlineData?.city.equals(cityToFetch)){
+                    offlineData = getFavourites(context).firstOrNull { it.city.equals(cityToFetch, ignoreCase = true) }
+                }
 
-                if (offlineData != null) {
+                if (offlineData != null && offlineData.current != null) {
+                    LaunchedEffect(weatherState) {
+                        saveLastViewedData(context, cityToFetch, offlineData.current, offlineData.forecast)
+                    }
                     Column (modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                         Text("Offline mode, data may be inaccurate", modifier = Modifier.padding(16.dp),  fontSize = 18.sp,color = Color.White, textAlign = TextAlign.Center)
-                        WeatherCard(offlineData.current!!)
+                        WeatherCard(offlineData.current)
                         if (offlineData.forecast != null) {
                             ForecastList(offlineData.forecast)
                         }
@@ -66,7 +73,7 @@ fun WeatherScreen(city: String? = null) {
                     Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                         Text("Weather data fetch failed", color = Color.White, fontSize = 28.sp)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(weatherState.message, color = Color.White, fontSize = 16.sp)
+                        Text("check your internet connection", color = Color.White, fontSize = 16.sp)
                     }
                 }
             }

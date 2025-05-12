@@ -3,7 +3,6 @@ package com.example.weather_app.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,14 +49,16 @@ import androidx.navigation.NavController
 import com.example.weather_app.ui.theme.DarkBlue3
 import com.example.weather_app.util.Screen
 import com.example.weather_app.util.addCityToSearchHistory
-import com.example.weather_app.util.addFavourite
+import com.example.weather_app.util.addOrUpdateFavourite
 import com.example.weather_app.util.getFavourites
 import com.example.weather_app.util.getSearchHistory
 import com.example.weather_app.util.gradientBackgroundBrush
 import com.example.weather_app.util.mainGradientColors
 import com.example.weather_app.util.removeCityFromSearchHistory
 import com.example.weather_app.util.removeFavourite
+import com.example.weather_app.util.toCityList
 import com.example.weather_app.util.toast
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -195,8 +197,9 @@ fun SearchBar(onSearch: (String) -> Unit) {
 @Composable
 fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     var favourites by remember { mutableStateOf(getFavourites(context)) }
-    val isCityInFavourites = favourites.contains(city)
+    val isCityInFavourites = favourites.toCityList().contains(city)
 
     Row(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.1f)).clickable { onClick() }.padding(12.dp),
@@ -218,18 +221,18 @@ fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit) {
             }
         ) { Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove from history", tint = Color.White.copy(alpha = 0.8f)) }
 
-        IconButton(
-            onClick = {
+        IconButton(onClick = {
+            coroutineScope.launch {
                 if (isCityInFavourites) {
                     removeFavourite(context, city)
                     context.toast("Removed ${city.capitalize()} from favourites")
                 } else {
-                    addFavourite(context, city)
+                    addOrUpdateFavourite(context, city)
                     context.toast("Added ${city.capitalize()} to favourites")
                 }
                 favourites = getFavourites(context)
             }
-        ) {
+        }) {
             Icon( imageVector = if (isCityInFavourites) Icons.Default.Favorite else Icons.Default.FavoriteBorder,  contentDescription = "Add to favourites",  tint = Color.White )
         }
     }
