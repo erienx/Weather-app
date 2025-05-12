@@ -125,3 +125,36 @@ fun getLastViewedData(context: Context): WeatherData? {
     return gson.fromJson(dataJson, WeatherData::class.java)
 }
 
+private const val UNITS = "units"
+private const val AUTO_REFRESH = "auto_refresh"
+private const val REFRESH_INTERVAL = "refresh_interval"
+
+fun setUnitSystem(context: Context, unit: String) {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    prefs.edit().putString(UNITS, unit).apply()
+}
+
+fun getUnitSystem(context: Context): String {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    return prefs.getString(UNITS, "metric") ?: "metric"
+}
+
+fun setAutoRefresh(context: Context, auto: Boolean) {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    prefs.edit().putBoolean(AUTO_REFRESH, auto).apply()
+}
+
+fun isAutoRefresh(context: Context): Boolean {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    return prefs.getBoolean(AUTO_REFRESH, true)
+}
+
+fun setRefreshInterval(context: Context, minutes: Int) {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    prefs.edit().putInt(REFRESH_INTERVAL, minutes).apply()
+}
+
+fun getRefreshInterval(context: Context): Int {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    return prefs.getInt(REFRESH_INTERVAL, 15)
+}

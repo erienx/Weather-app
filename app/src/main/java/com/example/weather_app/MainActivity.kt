@@ -17,6 +17,7 @@ import androidx.navigation.navArgument
 import com.example.weather_app.components.BottomNavigationBar
 import com.example.weather_app.components.FavouritesScreen
 import com.example.weather_app.components.SearchScreen
+import com.example.weather_app.components.SettingsScreen
 import com.example.weather_app.components.WeatherScreen
 import com.example.weather_app.util.Screen
 
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    val screens = listOf(Screen.Search, Screen.Weather, Screen.Favourites)
+    val screens = listOf(Screen.Search, Screen.Weather, Screen.Favourites, Screen.Settings)
 
     Scaffold(
         bottomBar = {
@@ -55,6 +56,7 @@ fun MainScreen() {
             composable(Screen.Favourites.route) {
                 FavouritesScreen(navController)
             }
+            composable(Screen.Settings.route) { SettingsScreen() }
         }
     }
 }

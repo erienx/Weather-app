@@ -20,9 +20,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,25 +56,21 @@ import com.example.weather_app.util.toast
 fun FavouritesScreen(navController: NavController) {
     val context = LocalContext.current
     var favourites by remember { mutableStateOf(getFavourites(context)) }
-    val viewModel: WeatherView = viewModel()
 
     Box(
         modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors)),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(14.dp)) {
-            Button(onClick = {
-                viewModel.refreshFavoritesDataAndDisplayToast(context)
-            }) { Text("refresh favourites") }
-
             Spacer(modifier = Modifier.height(24.dp))
-            Text("Your favourites", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text("Your favourites", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterHorizontally))
 
             Spacer(modifier = Modifier.height(12.dp))
 
             if (favourites.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text( "No favourites added",  color = Color.White,  fontSize = 20.sp,  fontWeight = FontWeight.SemiBold)
+                    Text("No favourites added", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -88,7 +88,7 @@ fun FavouritesScreen(navController: NavController) {
             }
         }
     }
-}
+    }
 
 @Composable
 fun FavouriteItem(city: String, onRemove: () -> Unit, onClick: () -> Unit) {

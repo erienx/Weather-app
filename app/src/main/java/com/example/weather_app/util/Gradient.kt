@@ -1,5 +1,7 @@
 package com.example.weather_app.util
 
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -29,6 +31,24 @@ val forecastGradientColors = listOf(
 val bottomNavGradientColors = listOf(
     DarkBlue1,DeepBlue2
 )
+@Composable
+fun getOutlinedInputColors(): TextFieldColors {
+    return OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color.White,
+        focusedLeadingIconColor = Color.White,
+        unfocusedLeadingIconColor = Color.LightGray,
+        unfocusedTextColor = Color.Gray,
+        focusedContainerColor = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent,
+        focusedBorderColor = Color.White,
+        unfocusedBorderColor = Color.White,
+        disabledBorderColor = Color.Transparent,
+        focusedPlaceholderColor = Color.LightGray,
+        unfocusedPlaceholderColor = Color.Gray,
+        disabledPlaceholderColor = Color.Transparent,
+        errorPlaceholderColor = Color.Red
+    )
+}
 
 @Composable
 internal fun gradientBackgroundBrush(
@@ -48,3 +68,4 @@ internal fun gradientBackgroundBrush(
         end = endOffset
     )
 }
+

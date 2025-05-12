@@ -35,11 +35,7 @@ fun BottomNavigationBar(navController: NavController, items: List<Screen>) {
             items.forEach { screen ->
                 NavigationBarItem(
                     icon = {
-                        Icon(
-                            screen.icon,
-                            contentDescription = screen.title,
-                            tint = Color.White
-                        )
+                        Icon(screen.icon, contentDescription = screen.title, tint = Color.White)
                     },
                     label = { Text(screen.title, color = Color.White) },
                     selected = currentRoute?.startsWith(screen.route) == true,

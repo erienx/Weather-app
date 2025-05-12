@@ -51,6 +51,7 @@ import com.example.weather_app.util.Screen
 import com.example.weather_app.util.addCityToSearchHistory
 import com.example.weather_app.util.addFavourite
 import com.example.weather_app.util.getFavourites
+import com.example.weather_app.util.getOutlinedInputColors
 import com.example.weather_app.util.getSearchHistory
 import com.example.weather_app.util.gradientBackgroundBrush
 import com.example.weather_app.util.mainGradientColors
@@ -146,21 +147,7 @@ fun SearchBar(onSearch: (String) -> Unit) {
                 isError = false
             },
             textStyle = TextStyle(fontSize = 18.sp, color = Color.White),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                focusedLeadingIconColor = Color.White,
-                unfocusedLeadingIconColor = Color.LightGray,
-                unfocusedTextColor = Color.Gray,
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedBorderColor = Color.White,
-                unfocusedBorderColor = Color.White,
-                disabledBorderColor = Color.Transparent,
-                focusedPlaceholderColor = Color.LightGray,
-                unfocusedPlaceholderColor = Color.Gray,
-                disabledPlaceholderColor = Color.Transparent,
-                errorPlaceholderColor = Color.Red,
-            ),
+            colors = getOutlinedInputColors(),
             placeholder = { Text("Enter city name...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "search") },
             singleLine = true,
