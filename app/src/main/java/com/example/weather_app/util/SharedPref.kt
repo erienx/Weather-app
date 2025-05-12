@@ -67,7 +67,7 @@ fun getFavourites(context: Context): List<WeatherData> {
     }
 }
 
-suspend fun addOrUpdateFavourite(context: Context, city: String): List<WeatherData> {
+suspend fun addFavourite(context: Context, city: String): List<WeatherData> {
     val currentFavourites = getFavourites(context).toMutableList()
     currentFavourites.removeAll { it.city.equals(city, ignoreCase = true) }
 

@@ -37,7 +37,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.weather_app.api.WeatherView
 import com.example.weather_app.util.Screen
 import com.example.weather_app.util.getFavourites
 import com.example.weather_app.util.gradientBackgroundBrush
@@ -50,12 +52,17 @@ import com.example.weather_app.util.toast
 fun FavouritesScreen(navController: NavController) {
     val context = LocalContext.current
     var favourites by remember { mutableStateOf(getFavourites(context)) }
+    val viewModel: WeatherView = viewModel()
 
     Box(
         modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors)),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(14.dp)) {
+            Button(onClick = {
+                viewModel.refreshFavoritesDataAndDisplayToast(context)
+            }) { Text("refresh favourites") }
+
             Spacer(modifier = Modifier.height(24.dp))
             Text("Your favourites", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
 

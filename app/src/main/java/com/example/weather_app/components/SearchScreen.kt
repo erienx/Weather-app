@@ -49,7 +49,7 @@ import androidx.navigation.NavController
 import com.example.weather_app.ui.theme.DarkBlue3
 import com.example.weather_app.util.Screen
 import com.example.weather_app.util.addCityToSearchHistory
-import com.example.weather_app.util.addOrUpdateFavourite
+import com.example.weather_app.util.addFavourite
 import com.example.weather_app.util.getFavourites
 import com.example.weather_app.util.getSearchHistory
 import com.example.weather_app.util.gradientBackgroundBrush
@@ -227,7 +227,7 @@ fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit) {
                     removeFavourite(context, city)
                     context.toast("Removed ${city.capitalize()} from favourites")
                 } else {
-                    addOrUpdateFavourite(context, city)
+                    addFavourite(context, city)
                     context.toast("Added ${city.capitalize()} to favourites")
                 }
                 favourites = getFavourites(context)

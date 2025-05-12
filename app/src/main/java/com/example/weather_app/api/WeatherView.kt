@@ -1,10 +1,17 @@
 package com.example.weather_app.api
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weather_app.util.API_KEY
+import com.example.weather_app.util.WeatherData
+import com.example.weather_app.util.getFavourites
+import com.example.weather_app.util.saveFavourites
+import com.example.weather_app.util.toast
 import kotlinx.coroutines.launch
 
 class WeatherView : ViewModel() {
@@ -23,6 +30,36 @@ class WeatherView : ViewModel() {
             } catch (e: Exception) {
                 fetchStatus = WeatherUIState.Error(e.message ?: "Error")
             }
+        }
+    }
+
+    fun refreshFavoritesDataAndDisplayToast(context: Context) {
+        viewModelScope.launch {
+            var fetchFailed = false
+            val favourites = getFavourites(context)
+
+            val updatedFavorites = mutableListOf<WeatherData>()
+            for (weatherData in favourites) {
+                val city = weatherData.city
+                try {
+                    val currentData = repository.getWeather(city, API_KEY)
+                    val forecastData = repository.getForecast(city, API_KEY)
+
+                    updatedFavorites.add(WeatherData(city = city, current = currentData, forecast = forecastData))
+
+                    Log.e("aa", "updated data")
+                } catch (e: Exception) {
+                    updatedFavorites.add(WeatherData(city = city, current = weatherData.current, forecast = weatherData.forecast))
+                    fetchFailed = true
+                    Log.e("aa", "kept old data")
+                }
+            }
+            saveFavourites(context, updatedFavorites)
+            if (fetchFailed)
+                context.toast("One or more locations couldn't be refreshed")
+            else
+                context.toast("Refreshed data")
+            Log.e("aa", "refreshed")
         }
     }
 }
