@@ -1,6 +1,7 @@
 package com.example.weather_app.components
 
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.weather_app.R
 import com.example.weather_app.api.ApiDataCurrent
 import com.example.weather_app.util.cardGradientColors
+import com.example.weather_app.util.getUnitSystem
 import com.example.weather_app.util.gradientBackgroundBrush
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -41,28 +45,58 @@ fun WeatherCard(
     modifier: Modifier = Modifier,
     backgroundColors: List<Color> = cardGradientColors,
 ){
+    val context = LocalContext.current
+    val units = getUnitSystem(context)
+
+    val temp = if (units == "imperial") {
+        ((data.main.temp * 9 / 5) + 32).roundToInt()
+    } else {
+        data.main.temp.roundToInt()
+    }
+    val tempUnit = if (units == "imperial") "°F" else "°C"
+
+    val wind = if (units == "imperial") {
+        (data.wind.speed * 2.23694).roundToInt()
+    } else {
+        (data.wind.speed * 3.6).roundToInt()
+    }
+    val windUnit = if (units == "imperial") "mph" else "km/h"
+
+    val pressure = if (units == "imperial") {
+        (data.main.pressure * 0.02953).roundToInt()
+    } else {
+        data.main.pressure
+    }
+    val pressureUnit = if (units == "imperial") "inHg" else "hPa"
     Card(
-        modifier = modifier.fillMaxWidth().padding(14.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(14.dp),
         shape = RoundedCornerShape(10.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     )
     {
         Box(modifier = Modifier
-            .background(brush = gradientBackgroundBrush(colors = backgroundColors, isVerticalGradient = false))
+            .background(
+                brush = gradientBackgroundBrush(
+                    colors = backgroundColors,
+                    isVerticalGradient = false
+                )
+            )
             .padding(14.dp)) {
             Column(modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                    verticalAlignment = Alignment.Top
                 ) {
                     Text(
                         "${data.name}, ${data.sys.country}",
                         color = Color.White,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold, modifier = Modifier.width(170.dp)
                     )
                     Text(getRefreshedTimeString(data.dt), color = Color.White, fontSize = 14.sp)
                 }
@@ -75,7 +109,7 @@ fun WeatherCard(
                     modifier = Modifier.size(120.dp)
                 )
 
-                Text("${data.main.temp.roundToInt()}°C",color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Bold)
+                Text("${temp}${tempUnit}}",color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Bold)
 
                 Spacer(modifier = Modifier.height(2.dp))
 
@@ -83,9 +117,9 @@ fun WeatherCard(
 
                 Spacer(modifier = Modifier.height(48.dp))
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween){
-                    WeatherDetails(num = data.main.pressure, unit = "hpa", icon = ImageVector.vectorResource(id = R.drawable.ic_pressure))
+                    WeatherDetails(num =  pressure , unit = pressureUnit, icon = ImageVector.vectorResource(id = R.drawable.ic_pressure))
                     WeatherDetails(num = data.main.humidity, unit = "%", icon = ImageVector.vectorResource(id = R.drawable.ic_drop))
-                    WeatherDetails(num = data.wind.speed.roundToInt(), unit = "km/h", icon = ImageVector.vectorResource(id = R.drawable.ic_wind))
+                    WeatherDetails(num = wind, unit = windUnit, icon = ImageVector.vectorResource(id = R.drawable.ic_wind))
                 }
             }
         }
