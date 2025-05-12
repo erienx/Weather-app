@@ -1,6 +1,8 @@
 package com.example.weather_app.util
 
 import android.content.Context
+import androidx.compose.ui.text.toLowerCase
+import java.util.Locale
 
 private const val PREF_NAME = "weather_prefs"
 
@@ -20,8 +22,15 @@ fun saveSearchHistory(context: Context, history: List<String>) {
 
 fun addCityToSearchHistory(context: Context, city: String): List<String> {
     val currentHistory = getSearchHistory(context).toMutableList()
-    currentHistory.remove(city)
-    currentHistory.add(0, city)
+    currentHistory.remove(city.toLowerCase())
+    currentHistory.add(0, city.toLowerCase())
+    val trimmed = currentHistory.take(5)
+    saveSearchHistory(context, trimmed)
+    return trimmed
+}
+fun removeCityFromSearchHistory(context: Context, city: String): List<String> {
+    val currentHistory = getSearchHistory(context).toMutableList()
+    currentHistory.remove(city.toLowerCase())
     val trimmed = currentHistory.take(5)
     saveSearchHistory(context, trimmed)
     return trimmed
@@ -40,14 +49,18 @@ fun getFavourites(context: Context): List<String>{
 }
 fun addFavourite(context: Context, fav: String): List<String>{
     val currentFavs = getFavourites(context).toMutableList()
-    currentFavs.remove(fav)
-    currentFavs.add(0, fav)
+    currentFavs.remove(fav.toLowerCase())
+    currentFavs.add(0, fav.toLowerCase())
     saveFavourites(context, currentFavs)
     return currentFavs
 }
 fun removeFavourite(context: Context, fav: String): List<String>{
     val currentFavs = getFavourites(context).toMutableList()
-    currentFavs.remove(fav)
+    currentFavs.remove(fav.toLowerCase())
     saveFavourites(context, currentFavs)
     return currentFavs
+}
+
+fun String.toLowerCase(): String {
+    return this.lowercase(Locale.getDefault())
 }

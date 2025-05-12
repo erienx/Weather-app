@@ -21,11 +21,13 @@ val cardGradientColors = listOf(
     DeepBlue2,
     DeepBlue1
 )
+val forecastGradientColors = listOf(
+    DarkBlue2,
+    DarkBlue3
+)
 
 val bottomNavGradientColors = listOf(
-    Color(0xFF2C3E50),
-    Color(0xFF34495E),
-    Color(0xFF22313F),
+    DarkBlue1,DeepBlue2
 )
 
 @Composable

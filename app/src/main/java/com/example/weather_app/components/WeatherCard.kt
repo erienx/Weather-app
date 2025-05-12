@@ -27,10 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.weather_app.R
-import com.example.weather_app.api.ApiData
+import com.example.weather_app.api.ApiDataCurrent
 import com.example.weather_app.util.cardGradientColors
 import com.example.weather_app.util.gradientBackgroundBrush
-import com.example.weather_app.util.mainGradientColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -38,7 +37,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun WeatherCard(
-    data: ApiData,
+    data: ApiDataCurrent,
     modifier: Modifier = Modifier,
     backgroundColors: List<Color> = cardGradientColors,
 ){

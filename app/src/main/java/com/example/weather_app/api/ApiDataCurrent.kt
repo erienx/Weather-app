@@ -1,6 +1,6 @@
 package com.example.weather_app.api
 
-data class ApiData(
+data class ApiDataCurrent(
     val base: String,
     val clouds: Clouds,
     val cod: Int,

@@ -13,7 +13,10 @@ class WeatherRepository {
             .build()
         api = retrofit.create(WeatherApi::class.java)
     }
-    suspend fun getWeather(city: String, key: String): ApiData {
+    suspend fun getWeather(city: String, key: String): ApiDataCurrent {
         return api.getCurrentWeather(city, key)
+    }
+    suspend fun getForecast(city: String, key: String): ApiDataForecast {
+        return api.getForecast(city, key)
     }
 }

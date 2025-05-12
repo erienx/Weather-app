@@ -13,12 +13,13 @@ class WeatherView : ViewModel() {
     var fetchStatus by mutableStateOf<WeatherUIState>(WeatherUIState.Loading)
         private set
 
-    fun fetchWeather(city: String, apiKey: String) {
+    fun fetchWeatherData(city: String, apiKey: String) {
         viewModelScope.launch {
             fetchStatus = WeatherUIState.Loading
             try {
-                val data = repository.getWeather(city, apiKey)
-                fetchStatus = WeatherUIState.Success(data)
+                val currentData = repository.getWeather(city, apiKey)
+                val forecastData = repository.getForecast(city, apiKey)
+                fetchStatus = WeatherUIState.Success(currentData, forecastData)
             } catch (e: Exception) {
                 fetchStatus = WeatherUIState.Error(e.message ?: "Error")
             }
@@ -29,6 +30,6 @@ class WeatherView : ViewModel() {
 
 sealed class WeatherUIState {
     object Loading : WeatherUIState()
-    data class Success(val data: ApiData) : WeatherUIState()
+    data class Success(val currentData: ApiDataCurrent, val forecastData: ApiDataForecast? = null) : WeatherUIState()
     data class Error(val message: String) : WeatherUIState()
 }

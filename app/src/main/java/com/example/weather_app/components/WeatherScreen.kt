@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.weather_app.api.ApiData
+import com.example.weather_app.api.ApiDataCurrent
 import com.example.weather_app.api.WeatherUIState
 import com.example.weather_app.api.WeatherView
 import com.example.weather_app.util.gradientBackgroundBrush
@@ -30,8 +30,8 @@ fun WeatherScreen(city: String = "lodz") {
     val viewModel: WeatherView = viewModel()
     val weatherState = viewModel.fetchStatus
 
-    LaunchedEffect(key1= city) {
-        viewModel.fetchWeather(city, apiKey)
+    LaunchedEffect(key1 = city) {
+        viewModel.fetchWeatherData(city, apiKey)
     }
 
     Box(modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors))){
@@ -47,14 +47,19 @@ fun WeatherScreen(city: String = "lodz") {
                 }
             }
             is WeatherUIState.Success -> {
-                WeatherInfoContent(weatherState.data)
+                Column {
+                    WeatherInfoContent(weatherState.currentData)
+                    if (weatherState.forecastData != null) {
+                        ForecastList(weatherState.forecastData)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun WeatherInfoContent(data: ApiData){
+fun WeatherInfoContent(data: ApiDataCurrent){
     WeatherCard(data)
 }
 

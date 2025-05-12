@@ -26,7 +26,7 @@ fun BottomNavigationBar(navController: NavController, items: List<Screen>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(gradientBackgroundBrush(colors = bottomNavGradientColors))
+            .background(gradientBackgroundBrush(colors = bottomNavGradientColors, isVerticalGradient = false))
     ) {
         NavigationBar(
             modifier = Modifier.fillMaxWidth(),
