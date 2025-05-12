@@ -109,7 +109,7 @@ fun WeatherCard(
                     modifier = Modifier.size(120.dp)
                 )
 
-                Text("${temp}${tempUnit}}",color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Bold)
+                Text("${temp}${tempUnit}",color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Bold)
 
                 Spacer(modifier = Modifier.height(2.dp))
 

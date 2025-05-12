@@ -30,9 +30,11 @@ import coil.request.ImageRequest
 import com.example.weather_app.R
 import com.example.weather_app.api.ApiDataForecast
 import com.example.weather_app.api.ItemForecast
+import com.example.weather_app.util.getUnitSystem
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @Composable
 fun ForecastList(forecast: ApiDataForecast) {
@@ -106,6 +108,19 @@ fun processForecasts(forecastList: List<ItemForecast>): List<ForecastData> {
 
 @Composable
 fun ForecastDayRow(forecast: ForecastData) {
+    val context = LocalContext.current
+    val units = getUnitSystem(context)
+
+    val minTemp = if (units == "imperial") {
+        ((forecast.minTemp * 9 / 5) + 32).roundToInt()
+    } else {
+        forecast.minTemp.roundToInt()
+    }
+    val maxTemp = if (units == "imperial") {
+        ((forecast.maxTemp * 9 / 5) + 32).roundToInt()
+    } else {
+        forecast.maxTemp.roundToInt()
+    }
     Row(
         modifier = Modifier
             .padding(12.dp)
@@ -129,7 +144,7 @@ fun ForecastDayRow(forecast: ForecastData) {
             AsyncImage(model = ImageRequest.Builder(LocalContext.current).data(iconUrl).crossfade(true).build(),
                 contentDescription = "Weather Icon", modifier = Modifier.size(40.dp), contentScale = ContentScale.Fit)
 
-            Text(text = "${forecast.maxTemp.toInt()}° ${forecast.minTemp.toInt()}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.width(60.dp))
+            Text(text = "${minTemp}° ${maxTemp}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.width(60.dp))
         }
     }
 }
