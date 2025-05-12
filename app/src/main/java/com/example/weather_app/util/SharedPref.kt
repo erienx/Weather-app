@@ -73,6 +73,7 @@ fun String.toLowerCase(): String {
 data class WeatherData(
     val current: ApiDataCurrent? = null,
     val forecast: ApiDataForecast? = null,
+    val city: String,
 )
 
 private const val LAST_SAVE = "last_viewed_save"
@@ -81,7 +82,7 @@ fun saveLastViewedData(context: Context, city: String, currentWeather: ApiDataCu
     val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     val gson = Gson()
 
-    val offlineData = WeatherData( current = currentWeather, forecast = forecastWeather)
+    val offlineData = WeatherData(city=city, current = currentWeather, forecast = forecastWeather)
 
     val dataJson = gson.toJson(offlineData)
 
