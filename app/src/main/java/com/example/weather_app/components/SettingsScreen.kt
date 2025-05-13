@@ -155,6 +155,9 @@ fun SettingsScreen() {
                                         setRefreshInterval(context, newRefresh)
                                         intervalField = newRefresh.toString()
                                     }
+                                    else{
+                                        context.toast("Incorrect refresh value")
+                                    }
                                 } else {
                                     context.toast("Incorrect refresh value")
                                 }
@@ -164,7 +167,7 @@ fun SettingsScreen() {
                                 containerColor = Color.Transparent,
                             ),
                         ) {
-                            Text("Set")
+                            Text("Set", fontSize = 18.sp)
                         }
                     }
                 }
