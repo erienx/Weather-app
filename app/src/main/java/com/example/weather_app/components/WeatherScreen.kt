@@ -33,7 +33,7 @@ import com.example.weather_app.util.mainGradientColors
 import com.example.weather_app.util.saveLastViewedData
 
 @Composable
-fun WeatherScreen(city: String? = null) {
+fun WeatherScreen(city: String? = null, key: Int = 0) {
     val apiKey = API_KEY
     val context = LocalContext.current
     var cityToFetch = city
@@ -45,10 +45,9 @@ fun WeatherScreen(city: String? = null) {
     val viewModel: WeatherView = viewModel()
     val weatherState = viewModel.fetchStatus
 
-    LaunchedEffect(key1 = cityToFetch) {
+    LaunchedEffect(cityToFetch, key) {
         viewModel.fetchWeatherData(cityToFetch, apiKey)
     }
-
     Box(modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors))){
         when (weatherState){
             is WeatherUIState.Loading -> {

@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,10 +56,13 @@ import com.example.weather_app.util.toCityList
 import com.example.weather_app.util.toast
 
 @Composable
-fun FavouritesScreen(navController: NavController) {
+fun FavouritesScreen(navController: NavController, onCitySelected: ((String) -> Unit)? = null, key: Int = 0) {
     val context = LocalContext.current
     var favourites by remember { mutableStateOf(getFavourites(context)) }
 
+    LaunchedEffect(key) {
+        favourites = getFavourites(context)
+    }
     Box(
         modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors)),
         contentAlignment = Alignment.TopCenter
@@ -80,10 +84,11 @@ fun FavouritesScreen(navController: NavController) {
                         FavouriteItem(city = city, onRemove = {
                             favourites = getFavourites(context)
                         }, onClick = {
-                            navController.navigate("weather/$city") {
+                            onCitySelected?.invoke(city) ?: navController.navigate("weather/$city") {
                                 popUpTo(Screen.Search.route) { inclusive = true }
                                 launchSingleTop = true
                             }
+
                         })
                     }
                 }

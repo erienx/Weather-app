@@ -66,14 +66,14 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun SearchScreen(navController: NavController) {
+fun SearchScreen(navController: NavController, onCitySelected: ((String) -> Unit)? = null, onFavouriteToggled: () -> Unit = {}) {
     val context = LocalContext.current
     var searchHistory by remember { mutableStateOf(getSearchHistory(context)) }
 
     fun redirectToCity(city: String) {
         val updatedHistory = addCityToSearchHistory(context, city)
         searchHistory = updatedHistory
-        navController.navigate("weather/$city") {
+        onCitySelected?.invoke(city) ?: navController.navigate("weather/$city") {
             popUpTo(Screen.Search.route) { inclusive = true }
             launchSingleTop = true
         }
@@ -129,7 +129,7 @@ fun SearchScreen(navController: NavController) {
                             redirectToCity(city)
                         }, onRemove = {
                             searchHistory = getSearchHistory(context)
-                        })
+                        },onFavouriteToggled = onFavouriteToggled)
                     }
                 }
             }
@@ -185,7 +185,7 @@ fun SearchBar(onSearch: (String) -> Unit) {
 }
 
 @Composable
-fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit) {
+fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit, onFavouriteToggled: () -> Unit = {}) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var favourites by remember { mutableStateOf(getFavourites(context)) }
@@ -221,6 +221,8 @@ fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit) {
                     context.toast("Added ${city.capitalize()} to favourites")
                 }
                 favourites = getFavourites(context)
+                onFavouriteToggled()
+
             }
         }) {
             Icon( imageVector = if (isCityInFavourites) Icons.Default.Favorite else Icons.Default.FavoriteBorder,  contentDescription = "Add to favourites",  tint = Color.White )

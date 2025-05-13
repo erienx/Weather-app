@@ -56,7 +56,7 @@ import com.example.weather_app.util.setUnitSystem
 import com.example.weather_app.util.toast
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onUnitChanged: () -> Unit = {}, key: Int = 0) {
     val context = LocalContext.current
     val viewModel: WeatherView = viewModel()
 
@@ -87,6 +87,7 @@ fun SettingsScreen() {
                     onClick = {
                         unitSystem = "metric"
                         setUnitSystem(context, "metric")
+                        onUnitChanged()
                     }, colors = RadioButtonDefaults.colors(selectedColor = Color.White, unselectedColor = Color.Gray)
                 )
                 Text("Metric", color = Color.White, fontSize = 16.sp)
@@ -98,6 +99,7 @@ fun SettingsScreen() {
                     onClick = {
                         unitSystem = "imperial"
                         setUnitSystem(context, "imperial")
+                        onUnitChanged()
                     }, colors = RadioButtonDefaults.colors(selectedColor = Color.White, unselectedColor = Color.Gray)
                 )
                 Text("Imperial", color = Color.White, fontSize = 16.sp)
@@ -106,7 +108,7 @@ fun SettingsScreen() {
             Spacer(Modifier.height(20.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text("Auto-refresh favourites", fontWeight = FontWeight.SemiBold, color = Color.White, fontSize = 22.sp)
+                Text("Auto-refresh favourites", fontWeight = FontWeight.SemiBold, color = Color.White, fontSize = 18.sp)
                 Switch(checked = autoRefresh,
                     onCheckedChange = {
                         autoRefresh = it
@@ -167,7 +169,7 @@ fun SettingsScreen() {
                                 containerColor = Color.Transparent,
                             ),
                         ) {
-                            Text("Set", fontSize = 18.sp)
+                            Text("Set", fontSize = 14.sp)
                         }
                     }
                 }

@@ -91,7 +91,7 @@ fun processForecasts(forecastList: List<ItemForecast>): List<ForecastData> {
 
 
         val input = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
-        val output = DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())
+        val output = DateTimeFormatter.ofPattern("EEE", Locale.getDefault())
         var day = output.format(LocalDate.parse(dateString, input))
         val currentDay = LocalDate.now().format(output)
 
@@ -122,30 +122,28 @@ fun ForecastDayRow(forecast: ForecastData) {
     } else {
         forecast.maxTemp.roundToInt()
     }
-    Row(
-        modifier = Modifier
-            .padding(12.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = forecast.date, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+
+    Row(modifier = Modifier.padding(vertical = 6.dp, horizontal = 8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(text = forecast.date, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
 
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
-            Icon(painter = painterResource(id = R.drawable.ic_drop), contentDescription = "Humidity", tint = Color.White, modifier = Modifier.size(16.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(text = "${forecast.humidity}%", color = Color.White, fontSize = 16.sp)
-            Spacer(modifier = Modifier.width(8.dp))
+            Icon(painter = painterResource(id = R.drawable.ic_drop), contentDescription = "Humidity", tint = Color.White, modifier = Modifier.size(14.dp))
+            Spacer(modifier = Modifier.width(2.dp))
+            Text(text = "${forecast.humidity}%", color = Color.White, fontSize = 14.sp)
+            Spacer(modifier = Modifier.width(6.dp))
 
             var iconUrl = "https://openweathermap.org/img/wn/${forecast.dayIcon}@2x.png"
             AsyncImage(model = ImageRequest.Builder(LocalContext.current).data(iconUrl).crossfade(true).build(),
-                contentDescription = "Weather Icon", modifier = Modifier.size(40.dp), contentScale = ContentScale.Fit)
+                contentDescription = "Day Weather Icon",
+                modifier = Modifier.size(32.dp), contentScale = ContentScale.Fit)
 
             iconUrl = "https://openweathermap.org/img/wn/${forecast.nightIcon}@2x.png"
             AsyncImage(model = ImageRequest.Builder(LocalContext.current).data(iconUrl).crossfade(true).build(),
-                contentDescription = "Weather Icon", modifier = Modifier.size(40.dp), contentScale = ContentScale.Fit)
+                contentDescription = "Night Weather Icon",
+                modifier = Modifier.size(32.dp), contentScale = ContentScale.Fit)
 
-            Text(text = "${maxTemp}° ${minTemp}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.width(60.dp))
+            Text(text = "${maxTemp}°/${minTemp}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.width(56.dp)
+            )
         }
     }
 }
