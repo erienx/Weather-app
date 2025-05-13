@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,7 +64,7 @@ fun WeatherScreen(city: String? = null) {
                     LaunchedEffect(weatherState) {
                         saveLastViewedData(context, cityToFetch, offlineData.current, offlineData.forecast)
                     }
-                    Column (modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
+                    Column (modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                         Text("Offline mode, data may be inaccurate", modifier = Modifier.padding(16.dp),  fontSize = 18.sp,color = Color.White, textAlign = TextAlign.Center)
                         WeatherCard(offlineData.current)
                         if (offlineData.forecast != null) {
@@ -70,7 +72,7 @@ fun WeatherScreen(city: String? = null) {
                         }
                     }
                 } else {
-                    Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
+                    Column (modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
                         Text("Weather data fetch failed", color = Color.White, fontSize = 28.sp)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("check your internet connection", color = Color.White, fontSize = 16.sp)
@@ -81,7 +83,7 @@ fun WeatherScreen(city: String? = null) {
                 LaunchedEffect(weatherState) {
                     saveLastViewedData(context, cityToFetch, weatherState.currentData, weatherState.forecastData)
                 }
-                Column {
+                Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally){
                     WeatherCard(weatherState.currentData)
                     if (weatherState.forecastData != null) {
                         ForecastList(weatherState.forecastData)

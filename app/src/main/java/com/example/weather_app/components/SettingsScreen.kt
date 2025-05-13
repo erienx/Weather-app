@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -72,7 +75,7 @@ fun SettingsScreen() {
 
     Box(
         modifier = Modifier.background(brush = gradientBackgroundBrush(colors = mainGradientColors)).padding(10.dp)) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             Text("Settings", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
 
             Spacer(Modifier.height(20.dp))
@@ -137,13 +140,13 @@ fun SettingsScreen() {
                                 intervalField = it.filter { char -> char.isDigit() }
                             },
                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(2f).heightIn(min = 56.dp),
                             colors = getOutlinedInputColors(),
                         )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        Button(
+                        OutlinedButton(
                             onClick = {
                                 val newRefresh = intervalField.toIntOrNull()
                                 if (newRefresh != null) {
@@ -155,7 +158,11 @@ fun SettingsScreen() {
                                 } else {
                                     context.toast("Incorrect refresh value")
                                 }
-                            }
+                            },modifier = Modifier.weight(1f).padding(6.dp).heightIn(min = 56.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = Color.White,
+                                containerColor = Color.Transparent,
+                            ),
                         ) {
                             Text("Set")
                         }
@@ -167,7 +174,7 @@ fun SettingsScreen() {
 
             OutlinedButton(
                 onClick = { viewModel.refreshFavoritesDataAndDisplayToast(context) },
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+                modifier = Modifier.align(Alignment.CenterHorizontally).heightIn(min = 56.dp),
                 colors = ButtonDefaults.buttonColors(
                     contentColor = Color.White,
                     containerColor = Color.Transparent,

@@ -3,6 +3,7 @@ package com.example.weather_app.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,8 +46,8 @@ fun ForecastList(forecast: ApiDataForecast) {
         .padding(16.dp)
         .clip(RoundedCornerShape(12.dp))
         .background(color = Color.White.copy(alpha = 0.1f))) {
-        LazyColumn {
-            items(groupedForecast) { dayForecast ->
+        Column(modifier = Modifier.padding(8.dp)) {
+            groupedForecast.forEach { dayForecast ->
                 ForecastDayRow(dayForecast)
             }
         }

@@ -1,6 +1,7 @@
 package com.example.weather_app.components
 
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -15,7 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
@@ -85,7 +88,7 @@ fun SearchScreen(navController: NavController) {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         )
@@ -120,8 +123,8 @@ fun SearchScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                LazyColumn {
-                    items(searchHistory) { city ->
+                Column {
+                    searchHistory.map { city ->
                         SearchHistoryItem(city = city, onClick = {
                             redirectToCity(city)
                         }, onRemove = {

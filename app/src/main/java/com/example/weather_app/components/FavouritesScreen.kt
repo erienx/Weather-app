@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
@@ -61,7 +63,7 @@ fun FavouritesScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors)),
         contentAlignment = Alignment.TopCenter
     ) {
-        Column(modifier = Modifier.fillMaxSize().padding(14.dp)) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp)) {
             Spacer(modifier = Modifier.height(24.dp))
             Text("Your favourites", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -73,8 +75,8 @@ fun FavouritesScreen(navController: NavController) {
                     Text("No favourites added", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(favourites.toCityList()) { city ->
+                Column(modifier = Modifier.fillMaxSize()) {
+                    favourites.toCityList().map { city ->
                         FavouriteItem(city = city, onRemove = {
                             favourites = getFavourites(context)
                         }, onClick = {
