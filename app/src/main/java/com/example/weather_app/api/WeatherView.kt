@@ -11,6 +11,7 @@ import com.example.weather_app.util.API_KEY
 import com.example.weather_app.util.WeatherData
 import com.example.weather_app.util.getFavourites
 import com.example.weather_app.util.saveFavourites
+import com.example.weather_app.util.saveLastRefresh
 import com.example.weather_app.util.toast
 import kotlinx.coroutines.launch
 
@@ -55,6 +56,7 @@ class WeatherView : ViewModel() {
                 }
             }
             saveFavourites(context, updatedFavorites)
+            saveLastRefresh(context, timestamp = System.currentTimeMillis())
             if (fetchFailed)
                 context.toast("One or more locations couldn't be refreshed")
             else

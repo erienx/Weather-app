@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -49,17 +50,19 @@ import com.example.weather_app.util.mainGradientColors
 import com.example.weather_app.util.setAutoRefresh
 import com.example.weather_app.util.setRefreshInterval
 import com.example.weather_app.util.setUnitSystem
+import com.example.weather_app.util.toast
 
 @Composable
 fun SettingsScreen() {
     val context = LocalContext.current
     val viewModel: WeatherView = viewModel()
 
-    var unitSystem by remember { mutableStateOf("metric") }
-    var refreshInterval by remember { mutableStateOf(5) }
-    var autoRefresh by remember { mutableStateOf(true) }
 
-    var intervalField by remember { mutableStateOf("5") }
+    var unitSystem by remember { mutableStateOf(getUnitSystem(context)) }
+    var refreshInterval by remember { mutableStateOf(getRefreshInterval(context)) }
+    var autoRefresh by remember { mutableStateOf(isAutoRefresh(context)) }
+
+    var intervalField by remember { mutableStateOf(getRefreshInterval(context).toString()) }
 
     LaunchedEffect(Unit) {
         unitSystem = getUnitSystem(context)
@@ -115,25 +118,48 @@ fun SettingsScreen() {
             if (!autoRefresh) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Column {
-                    Text("Set refresh interval (minutes)", fontWeight = FontWeight.Light, color = Color.White, fontSize = 16.sp)
+                    Text(
+                        "Set refresh interval (minutes)",
+                        fontWeight = FontWeight.Light,
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    OutlinedTextField(
-                        value = intervalField,
-                        onValueChange = {
-                            val numsOnly = it.filter { char -> char.isDigit() }
-                            val fieldToInt = numsOnly.toIntOrNull()
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = intervalField,
+                            onValueChange = {
+                                intervalField = it.filter { char -> char.isDigit() }
+                            },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            colors = getOutlinedInputColors(),
+                        )
 
-                            if (fieldToInt != null) {
-                                refreshInterval = fieldToInt
-                                setRefreshInterval(context, fieldToInt)
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            onClick = {
+                                val newRefresh = intervalField.toIntOrNull()
+                                if (newRefresh != null) {
+                                    if (newRefresh in 1..10000) {
+                                        refreshInterval = newRefresh
+                                        setRefreshInterval(context, newRefresh)
+                                        intervalField = newRefresh.toString()
+                                    }
+                                } else {
+                                    context.toast("Incorrect refresh value")
+                                }
                             }
-                        },
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = getOutlinedInputColors(),
-                    )
+                        ) {
+                            Text("Set")
+                        }
+                    }
                 }
             }
 

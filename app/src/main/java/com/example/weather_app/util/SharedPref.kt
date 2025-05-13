@@ -158,3 +158,15 @@ fun getRefreshInterval(context: Context): Int {
     val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     return prefs.getInt(REFRESH_INTERVAL, 15)
 }
+
+const val LAST_REFRESH = "last_refresh"
+
+fun saveLastRefresh(context: Context, timestamp: Long) {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    prefs.edit().putLong(LAST_REFRESH, timestamp).apply()
+}
+
+fun getLastRefresh(context: Context): Long {
+    val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    return prefs.getLong(LAST_REFRESH, 0)
+}
