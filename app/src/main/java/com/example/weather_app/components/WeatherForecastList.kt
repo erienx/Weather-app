@@ -128,7 +128,7 @@ fun ForecastDayRow(forecast: ForecastData) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = forecast.date, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text(text = forecast.date, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
 
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
             Icon(painter = painterResource(id = R.drawable.ic_drop), contentDescription = "Humidity", tint = Color.White, modifier = Modifier.size(16.dp))
@@ -144,7 +144,7 @@ fun ForecastDayRow(forecast: ForecastData) {
             AsyncImage(model = ImageRequest.Builder(LocalContext.current).data(iconUrl).crossfade(true).build(),
                 contentDescription = "Weather Icon", modifier = Modifier.size(40.dp), contentScale = ContentScale.Fit)
 
-            Text(text = "${minTemp}° ${maxTemp}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.width(60.dp))
+            Text(text = "${maxTemp}° ${minTemp}°", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.width(60.dp))
         }
     }
 }
