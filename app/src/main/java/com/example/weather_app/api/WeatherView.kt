@@ -13,13 +13,53 @@ import com.example.weather_app.util.getFavourites
 import com.example.weather_app.util.saveFavourites
 import com.example.weather_app.util.saveLastRefresh
 import com.example.weather_app.util.toast
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.debounce
+
 
 class WeatherView : ViewModel() {
     private val repository = WeatherRepository()
 
     var fetchStatus by mutableStateOf<WeatherUIState>(WeatherUIState.Loading)
         private set
+
+    val citySuggestions = MutableStateFlow<List<ApiDataGeocoding>>(emptyList())
+
+    private val searchQuery = MutableStateFlow("")
+
+    private var searchJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            searchQuery
+                .debounce(500)
+                .collect { query ->
+                    if (query.length >= 2) {
+                        fetchCitySuggestions(query)
+                    } else {
+                        citySuggestions.value = emptyList()
+                    }
+                }
+        }
+    }
+    public fun setSearchQuery(query: String) {
+        searchQuery.value = query
+    }
+
+    private fun fetchCitySuggestions(query: String) {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            try {
+                val suggestions = repository.getCitySuggestions(query, API_KEY)
+                citySuggestions.value = suggestions
+            } catch (e: Exception) {
+                citySuggestions.value = emptyList()
+            }
+        }
+    }
 
     fun fetchWeatherData(city: String, apiKey: String) {
         viewModelScope.launch {

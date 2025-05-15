@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,7 +50,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.weather_app.api.ApiDataGeocoding
+import com.example.weather_app.api.WeatherView
 import com.example.weather_app.ui.theme.DarkBlue3
 import com.example.weather_app.util.Screen
 import com.example.weather_app.util.addCityToSearchHistory
@@ -69,6 +74,8 @@ import kotlinx.coroutines.launch
 fun SearchScreen(navController: NavController, onCitySelected: ((String) -> Unit)? = null, onFavouriteToggled: () -> Unit = {}) {
     val context = LocalContext.current
     var searchHistory by remember { mutableStateOf(getSearchHistory(context)) }
+    val viewModel: WeatherView = viewModel()
+    val citySuggestions by viewModel.citySuggestions.collectAsState()
 
     fun redirectToCity(city: String) {
         val updatedHistory = addCityToSearchHistory(context, city)
@@ -99,18 +106,33 @@ fun SearchScreen(navController: NavController, onCitySelected: ((String) -> Unit
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                "Search for a City",
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 14.dp)
-            )
+            Text("Search for a City", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 14.dp))
 
-            SearchBar(onSearch = { city -> redirectToCity(city) }
-            )
+            SearchBar(onSearchQueryChange = { query -> viewModel.setSearchQuery(query) } )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (citySuggestions.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Suggestions", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column {
+                    citySuggestions.forEach { suggestion ->
+                        SuggestionItem(
+                            suggestion = suggestion,
+                            onClick = {
+                                // Use city name for now, as requested
+                                redirectToCity(suggestion.name)
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             if (searchHistory.isNotEmpty()) {
                 Text(
@@ -138,7 +160,33 @@ fun SearchScreen(navController: NavController, onCitySelected: ((String) -> Unit
 }
 
 @Composable
-fun SearchBar(onSearch: (String) -> Unit) {
+fun SuggestionItem(suggestion: ApiDataGeocoding, onClick: () -> Unit) {
+    val locationText = buildString {
+        append(suggestion.name)
+        if (suggestion.state != null) {
+            append(", ${suggestion.state}")
+        }
+        append(", ${suggestion.country}")
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.15f)).clickable { onClick() }.padding(12.dp), verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Location", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(24.dp))
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = locationText, color = Color.White, fontSize = 16.sp)
+            Text( text = "Lat: ${"%.2f".format(suggestion.lat)}, Lon: ${"%.2f".format(suggestion.lon)}", color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
+        }
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+fun SearchBar(onSearchQueryChange: (String) -> Unit) {
     var searchQuery by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
 
@@ -148,6 +196,7 @@ fun SearchBar(onSearch: (String) -> Unit) {
             onValueChange = {
                 searchQuery = it
                 isError = false
+                onSearchQueryChange(it.trim())
             },
             textStyle = TextStyle(fontSize = 18.sp, color = Color.White),
             colors = getOutlinedInputColors(),
@@ -164,23 +213,23 @@ fun SearchBar(onSearch: (String) -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                if (searchQuery.trim().length < 2) {
-                    isError = true
-                } else {
-                    onSearch(searchQuery.trim())
-                }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = DarkBlue3,
-                contentColor = Color.White
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text( "Search",  fontSize = 22.sp,  fontWeight = FontWeight.SemiBold,  color = Color.White
-            )
-        }
+//        Button(
+//            onClick = {
+//                if (searchQuery.trim().length < 2) {
+//                    isError = true
+//                } else {
+//                    onSearch(searchQuery.trim())
+//                }
+//            },
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = DarkBlue3,
+//                contentColor = Color.White
+//            ),
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Text( "Search",  fontSize = 22.sp,  fontWeight = FontWeight.SemiBold,  color = Color.White
+//            )
+//        }
     }
 }
 

@@ -19,4 +19,16 @@ class WeatherRepository {
     suspend fun getForecast(city: String, key: String): ApiDataForecast {
         return api.getForecast(city, key)
     }
+    suspend fun getCitySuggestions(query: String, key: String): List<ApiDataGeocoding> {
+        return if (query.length >= 2) {
+            try {
+                api.getCitiesByName(query, 5, key)
+            } catch (e: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+    }
+
 }
