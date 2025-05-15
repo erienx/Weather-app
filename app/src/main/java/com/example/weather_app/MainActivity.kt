@@ -70,35 +70,15 @@ fun MainScreen() {
     val isWideScreen = context.resources.configuration.screenWidthDp >= 1200
 
     if (isWideScreen) {
-        Row(
-            Modifier.fillMaxSize().background(gradientBackgroundBrush(colors = mainGradientColors))
-        ) {
+        Row(Modifier.fillMaxSize().background(gradientBackgroundBrush(colors = mainGradientColors))) {
             Column(Modifier.weight(1f).padding(8.dp)) {
-                SearchScreen(
-                    navController = navController,
-                    onLocationSelected = {
-                        selectedLocation = it
-                        refreshTrigger++
-                    },
-                    onFavouriteToggled = {
-                        favouritesRefreshTrigger++
-                    }
-                )
+                SearchScreen(navController = navController, onLocationSelected = { selectedLocation = it }, onFavouriteToggled = { favouritesRefreshTrigger++ })
             }
             Column(Modifier.weight(1f).padding(8.dp)) {
-                FavouritesScreen(
-                    navController = navController,
-                    onLocationSelected = {
-                        selectedLocation = it
-                        refreshTrigger++
-                    },
-                    key = favouritesRefreshTrigger
-                )
+                FavouritesScreen(navController = navController, onLocationSelected = {selectedLocation = it }, key = favouritesRefreshTrigger)
             }
             Column(Modifier.weight(1f).padding(8.dp)) {
-                selectedLocation?.let {
-                    WeatherScreen(lat = it.lat, lon = it.lon, key = refreshTrigger)
-                }
+                WeatherScreen(lat = selectedLocation?.lat, lon = selectedLocation?.lon, key = refreshTrigger)
             }
             Column(Modifier.weight(1f).padding(8.dp)) {
                 SettingsScreen(onUnitChanged = { refreshTrigger++ })
