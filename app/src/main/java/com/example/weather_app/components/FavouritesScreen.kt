@@ -102,7 +102,7 @@ fun FavouriteItem(location: LocationData, onRemove: () -> Unit, onClick: () -> U
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
             Icon(imageVector = Icons.Default.Favorite, contentDescription = "favourite icon", tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Text(text = location.city.capitalize(), color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Medium)

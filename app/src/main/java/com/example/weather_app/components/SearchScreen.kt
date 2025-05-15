@@ -69,9 +69,6 @@ import com.example.weather_app.util.removeFromSearchHistory
 import com.example.weather_app.util.toCityList
 import com.example.weather_app.util.toast
 import kotlinx.coroutines.launch
-//        Text("Hello Mati!!!",color = Color.Red, fontSize = 94.sp)
-//            Spacer(modifier = Modifier.height(16.dp))
-//            Text("Miłego dnia!!!",color = Color.Magenta, fontSize = 48.sp)
 
 @Composable
 fun SearchScreen(navController: NavController, onLocationSelected: ((LocationData) -> Unit)? = null, onFavouriteToggled: () -> Unit = {}) {
@@ -91,9 +88,12 @@ fun SearchScreen(navController: NavController, onLocationSelected: ((LocationDat
 
     Box(modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors))) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+//            Text("Hello Mati!!!",color = Color.Red, fontSize = 94.sp)
+//            Spacer(modifier = Modifier.height(16.dp))
+//            Text("Miłego dnia!!!",color = Color.Magenta, fontSize = 48.sp)
             Spacer(modifier = Modifier.height(12.dp))
             Text("Search for a City", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-
+            Spacer(modifier = Modifier.height(6.dp))
             SearchBar { query -> viewModel.setSearchQuery(query) }
 
             if (citySuggestions.isNotEmpty()) {
@@ -102,7 +102,8 @@ fun SearchScreen(navController: NavController, onLocationSelected: ((LocationDat
                 Spacer(modifier = Modifier.height(8.dp))
 
                 citySuggestions.forEach { suggestion ->
-                    val location = LocationData(city = suggestion.name, lat = suggestion.lat, lon = suggestion.lon)
+                    val locationText = getLocationText(suggestion)
+                    val location = LocationData(city = locationText, lat = suggestion.lat, lon = suggestion.lon)
                     SuggestionItem(suggestion = suggestion) {
                         redirectToLocation(location)
                     }
@@ -121,17 +122,21 @@ fun SearchScreen(navController: NavController, onLocationSelected: ((LocationDat
         }
     }
 }
+fun getLocationText(data: ApiDataGeocoding): String {
+    val locationText = buildString {
+        append(data.name)
+        if (data.state != null) {
+            append(", ${data.state}")
+        }
+        append(", ${data.country}")
+    }
+    return locationText
+}
 
 
 @Composable
 fun SuggestionItem(suggestion: ApiDataGeocoding, onClick: () -> Unit) {
-    val locationText = buildString {
-        append(suggestion.name)
-        if (suggestion.state != null) {
-            append(", ${suggestion.state}")
-        }
-        append(", ${suggestion.country}")
-    }
+    val locationText = getLocationText(suggestion)
 
     Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.15f)).clickable { onClick() }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Location", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(24.dp))
@@ -182,14 +187,8 @@ fun SearchHistoryItem(location: LocationData, onClick: () -> Unit, onRemove: () 
     var favourites by remember { mutableStateOf(getFavourites(context)) }
     val isCityInFavourites = favourites.any { it.location == location }
 
-    Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.1f)).clickable { onClick() }.padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
-        ) {
+    Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.1f)).clickable { onClick() }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
             Icon( imageVector = Icons.Default.DateRange,  contentDescription = "History",  tint = Color.White.copy(alpha = 0.8f),  modifier = Modifier.size(24.dp) )
             Spacer(modifier = Modifier.width(16.dp))
             Text(text = location.city.capitalize(), color = Color.White, fontSize = 16.sp)
