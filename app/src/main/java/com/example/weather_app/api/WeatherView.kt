@@ -73,6 +73,18 @@ class WeatherView : ViewModel() {
             }
         }
     }
+    fun fetchWeatherDataByCoords(lat: Double, lon: Double, apiKey: String) {
+        viewModelScope.launch {
+            fetchStatus = WeatherUIState.Loading
+            try {
+                val currentData = repository.getCurrentByCoords(lat, lon, apiKey)
+                val forecastData = repository.getForecastByCoords(lat, lon, apiKey)
+                fetchStatus = WeatherUIState.Success(currentData, forecastData)
+            } catch (e: Exception) {
+                fetchStatus = WeatherUIState.Error(e.message ?: "Error")
+            }
+        }
+    }
 
     fun refreshFavoritesDataAndDisplayToast(context: Context) {
         viewModelScope.launch {

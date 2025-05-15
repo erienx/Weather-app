@@ -18,6 +18,8 @@ interface WeatherApi {
         @Query("units") units: String = "metric"
     ): ApiDataForecast
 
+
+
     @GET("geo/1.0/direct")
     suspend fun getCitiesByName(
         @Query("q") cityName: String,
@@ -25,4 +27,19 @@ interface WeatherApi {
         @Query("appid") apiKey: String
     ): List<ApiDataGeocoding>
 
+    @GET("data/2.5/weather")
+    suspend fun getCurrentWeatherByCoords(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
+        @Query("appid") apiKey: String,
+        @Query("units") units: String = "metric"
+    ): ApiDataCurrent
+
+    @GET("data/2.5/forecast")
+    suspend fun getForecastByCoords(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
+        @Query("appid") apiKey: String,
+        @Query("units") units: String = "metric"
+    ): ApiDataForecast
 }

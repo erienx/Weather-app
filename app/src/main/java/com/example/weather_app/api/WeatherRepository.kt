@@ -30,5 +30,11 @@ class WeatherRepository {
             emptyList()
         }
     }
+    suspend fun getCurrentByCoords(lat: Double, lon: Double, key: String): ApiDataCurrent{
+        return api.getCurrentWeatherByCoords(lat,lon, key)
+    }
+    suspend fun getForecastByCoords(lat: Double, lon: Double, key: String): ApiDataForecast{
+        return api.getForecastByCoords(lat,lon, key)
+    }
 
 }
