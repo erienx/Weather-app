@@ -14,27 +14,38 @@ private const val PREF_NAME = "weather_prefs"
 
 private const val SEARCH_HISTORY = "search_history"
 
-fun getSearchHistory(context: Context): List<String> {
+fun getSearchHistory(context: Context): List<LocationData> {
     val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    return prefs.getStringSet(SEARCH_HISTORY, emptySet())?.toList() ?: emptyList()
+    val json = prefs.getString(SEARCH_HISTORY, null)
+    return if (json != null) {
+        val type = object : TypeToken<List<LocationData>>() {}.type
+        Gson().fromJson(json, type)
+    } else {
+        emptyList()
+    }
 }
 
-fun saveSearchHistory(context: Context, history: List<String>) {
+fun saveSearchHistory(context: Context, history: List<LocationData>) {
     val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    prefs.edit().putStringSet(SEARCH_HISTORY, history.toSet()).apply()
+    val json = Gson().toJson(history)
+    prefs.edit().putString(SEARCH_HISTORY, json).apply()
 }
 
-fun addCityToSearchHistory(context: Context, city: String): List<String> {
+fun addToSearchHistory(context: Context, location: LocationData): List<LocationData> {
+    if (location.city.isBlank()) {
+        return getSearchHistory(context)
+    }
+
     val currentHistory = getSearchHistory(context).toMutableList()
-    currentHistory.remove(city.lowercase(Locale.getDefault()))
-    currentHistory.add(0, city.lowercase(Locale.getDefault()))
+    currentHistory.removeAll { it.lat == location.lat && it.lon == location.lon }
+    currentHistory.add(0, location)
     val trimmed = currentHistory.take(5)
     saveSearchHistory(context, trimmed)
     return trimmed
 }
-fun removeCityFromSearchHistory(context: Context, city: String): List<String> {
+fun removeFromSearchHistory(context: Context, location: LocationData): List<LocationData> {
     val currentHistory = getSearchHistory(context).toMutableList()
-    currentHistory.remove(city.lowercase(Locale.getDefault()))
+    currentHistory.removeAll { it.city.equals(location.city, ignoreCase = true) }
     val trimmed = currentHistory.take(5)
     saveSearchHistory(context, trimmed)
     return trimmed
@@ -43,53 +54,49 @@ fun removeCityFromSearchHistory(context: Context, city: String): List<String> {
 data class WeatherData(
     val current: ApiDataCurrent? = null,
     val forecast: ApiDataForecast? = null,
-    val city: String,
+    val location: LocationData
 )
 private const val FAVOURITES_SAVE = "favourites_save"
 
-fun saveFavourites(context: Context, favourites: List<WeatherData>){
+fun saveFavourites(context: Context, favourites: List<WeatherData>) {
     val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    val gson = Gson()
-    val dataJson = gson.toJson(favourites)
-    prefs.edit().putString(FAVOURITES_SAVE, dataJson).apply()
+    val json = Gson().toJson(favourites)
+    prefs.edit().putString(FAVOURITES_SAVE, json).apply()
 }
 
 fun getFavourites(context: Context): List<WeatherData> {
     val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    val gson = Gson()
-    val dataJson = prefs.getString(FAVOURITES_SAVE, null)
-
-    return if (dataJson != null) {
+    val json = prefs.getString(FAVOURITES_SAVE, null)
+    return if (json != null) {
         val type = object : TypeToken<List<WeatherData>>() {}.type
-        gson.fromJson(dataJson, type) ?: emptyList()
+        Gson().fromJson(json, type)
     } else {
         emptyList()
     }
 }
 
-suspend fun addFavourite(context: Context, city: String): List<WeatherData> {
+suspend fun addFavourite(context: Context, location: LocationData): List<WeatherData> {
     val currentFavourites = getFavourites(context).toMutableList()
-    currentFavourites.removeAll { it.city.equals(city, ignoreCase = true) }
+    currentFavourites.removeAll { it.location.lat == location.lat && it.location.lon == location.lon }
 
     val repository = WeatherRepository()
     var currentData: ApiDataCurrent? = null
     var forecastData: ApiDataForecast? = null
 
     try {
-        currentData = repository.getWeather(city, API_KEY)
-        forecastData = repository.getForecast(city, API_KEY)
+        currentData = repository.getCurrentByCoords(location.lat, location.lon, API_KEY)
+        forecastData = repository.getForecastByCoords(location.lat, location.lon, API_KEY)
     } catch (e: Exception) {
     }
 
-    val newFavourite = WeatherData(city = city, current = currentData, forecast = forecastData)
+    val newFavourite = WeatherData(location = location, current = currentData, forecast = forecastData)
     currentFavourites.add(0, newFavourite)
     saveFavourites(context, currentFavourites)
-
     return currentFavourites
 }
-fun removeFavourite(context: Context, city: String): List<WeatherData> {
+fun removeFavourite(context: Context, location: LocationData): List<WeatherData> {
     val currentFavourites = getFavourites(context).toMutableList()
-    currentFavourites.removeAll { it.city.lowercase(Locale.getDefault()) == city.lowercase(Locale.getDefault()) }
+    currentFavourites.removeAll { it.location.lat == location.lat && it.location.lon == location.lon }
     saveFavourites(context, currentFavourites)
     return currentFavourites
 }
@@ -97,7 +104,7 @@ fun removeFavourite(context: Context, city: String): List<WeatherData> {
 fun List<WeatherData>.toCityList(): List<String> {
     val cityList = mutableListOf<String>()
     for (weatherData in this) {
-        cityList.add(weatherData.city)
+        cityList.add(weatherData.location.city)
     }
     return cityList
 }
@@ -105,24 +112,17 @@ fun List<WeatherData>.toCityList(): List<String> {
 
 private const val LAST_SAVE = "last_viewed_save"
 
-fun saveLastViewedData(context: Context, city: String, currentWeather: ApiDataCurrent?, forecastWeather: ApiDataForecast?) {
+fun saveLastViewedData(context: Context, location: LocationData, current: ApiDataCurrent?, forecast: ApiDataForecast?) {
     val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    val gson = Gson()
-
-    val offlineData = WeatherData(city=city, current = currentWeather, forecast = forecastWeather)
-
-    val dataJson = gson.toJson(offlineData)
-
-    prefs.edit().putString(LAST_SAVE, dataJson).apply()
+    val data = WeatherData(location = location, current = current, forecast = forecast)
+    val json = Gson().toJson(data)
+    prefs.edit().putString(LAST_SAVE, json).apply()
 }
 
 fun getLastViewedData(context: Context): WeatherData? {
     val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    val gson = Gson()
-
-    val dataJson = prefs.getString(LAST_SAVE, null)
-
-    return gson.fromJson(dataJson, WeatherData::class.java)
+    val json = prefs.getString(LAST_SAVE, null)
+    return Gson().fromJson(json, WeatherData::class.java)
 }
 
 private const val UNITS = "units"

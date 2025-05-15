@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.weather_app.api.WeatherView
+import com.example.weather_app.util.LocationData
 import com.example.weather_app.util.Screen
 import com.example.weather_app.util.getFavourites
 import com.example.weather_app.util.gradientBackgroundBrush
@@ -56,22 +57,19 @@ import com.example.weather_app.util.toCityList
 import com.example.weather_app.util.toast
 
 @Composable
-fun FavouritesScreen(navController: NavController, onCitySelected: ((String) -> Unit)? = null, key: Int = 0) {
+fun FavouritesScreen(navController: NavController, onLocationSelected: ((LocationData) -> Unit)? = null, key: Int = 0) {
     val context = LocalContext.current
     var favourites by remember { mutableStateOf(getFavourites(context)) }
 
     LaunchedEffect(key) {
         favourites = getFavourites(context)
     }
-    Box(
-        modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors)),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp)) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Your favourites", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.CenterHorizontally))
 
+    Box(modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors)), contentAlignment = Alignment.TopCenter) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp)) {
+
+            Spacer(modifier = Modifier.height(24.dp))
+            Text("Your favourites", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
             Spacer(modifier = Modifier.height(12.dp))
 
             if (favourites.isEmpty()) {
@@ -79,49 +77,43 @@ fun FavouritesScreen(navController: NavController, onCitySelected: ((String) -> 
                     Text("No favourites added", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
                 }
             } else {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    favourites.toCityList().map { city ->
-                        FavouriteItem(city = city, onRemove = {
-                            favourites = getFavourites(context)
-                        }, onClick = {
-                            onCitySelected?.invoke(city) ?: navController.navigate("weather/$city") {
+                favourites.forEach { fav ->
+                    FavouriteItem(
+                        location = fav.location,
+                        onRemove = { favourites = getFavourites(context) },
+                        onClick = {
+                            onLocationSelected?.invoke(fav.location) ?: navController.navigate("weather/${fav.location.lat}/${fav.location.lon}") {
                                 popUpTo(Screen.Search.route) { inclusive = true }
                                 launchSingleTop = true
                             }
-
-                        })
-                    }
+                        }
+                    )
                 }
             }
         }
     }
-    }
+}
+
 
 @Composable
-fun FavouriteItem(city: String, onRemove: () -> Unit, onClick: () -> Unit) {
+fun FavouriteItem(location: LocationData, onRemove: () -> Unit, onClick: () -> Unit) {
     val context = LocalContext.current
-    var favourites by remember { mutableStateOf(getFavourites(context)) }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.1f)).clickable{onClick()}.padding(16.dp),
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.1f)).clickable { onClick() }.padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
+        horizontalArrangement = Arrangement.SpaceBetween) {
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = Icons.Default.Favorite, contentDescription = "favourite icon", tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(12.dp))
-            Text(text = city.capitalize(), color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Medium)
+            Text(text = location.city.capitalize(), color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Medium)
         }
 
-        Button(
-            onClick = {
-                removeFavourite(context, city)
-                context.toast("Removed ${city.capitalize()} from favourites")
-                favourites = getFavourites(context)
-                onRemove()
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-        ) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = "remove from favourites", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(24.dp))
+        IconButton(onClick = {
+            removeFavourite(context, location)
+            context.toast("Removed ${location.city.capitalize()} from favourites")
+            onRemove()
+        }) {
+            Icon(Icons.Default.Delete, contentDescription = "Remove from favourites", tint = Color.White)
         }
     }
 }

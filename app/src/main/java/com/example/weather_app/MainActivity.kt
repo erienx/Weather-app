@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +37,7 @@ import com.example.weather_app.components.FavouritesScreen
 import com.example.weather_app.components.SearchScreen
 import com.example.weather_app.components.SettingsScreen
 import com.example.weather_app.components.WeatherScreen
+import com.example.weather_app.util.LocationData
 import com.example.weather_app.util.Screen
 import com.example.weather_app.util.getLastRefresh
 import com.example.weather_app.util.getRefreshInterval
@@ -56,26 +59,48 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     val context = LocalContext.current
     val navController = rememberNavController()
+
     val screens = listOf(Screen.Search, Screen.Weather, Screen.Favourites, Screen.Settings)
-    val selectedCity = remember { mutableStateOf<String?>(null) }
+
+    var selectedLocation by remember { mutableStateOf<LocationData?>(null) }
 
     var refreshTrigger by remember { mutableStateOf(0) }
     var favouritesRefreshTrigger by remember { mutableStateOf(0) }
 
-    if (context.resources.configuration.screenWidthDp >= 1200) {
+    val isWideScreen = context.resources.configuration.screenWidthDp >= 1200
+
+    if (isWideScreen) {
         Row(
             Modifier.fillMaxSize().background(gradientBackgroundBrush(colors = mainGradientColors))
         ) {
-            Column(modifier = Modifier.weight(1f).padding(8.dp)) {
-                SearchScreen(navController,onCitySelected = { selectedCity.value = it }, onFavouriteToggled = { favouritesRefreshTrigger++ })
+            Column(Modifier.weight(1f).padding(8.dp)) {
+                SearchScreen(
+                    navController = navController,
+                    onLocationSelected = {
+                        selectedLocation = it
+                        refreshTrigger++
+                    },
+                    onFavouriteToggled = {
+                        favouritesRefreshTrigger++
+                    }
+                )
             }
-            Column(modifier = Modifier.weight(1f).padding(8.dp)) {
-                FavouritesScreen(navController,onCitySelected = { selectedCity.value = it }, key = favouritesRefreshTrigger)
+            Column(Modifier.weight(1f).padding(8.dp)) {
+                FavouritesScreen(
+                    navController = navController,
+                    onLocationSelected = {
+                        selectedLocation = it
+                        refreshTrigger++
+                    },
+                    key = favouritesRefreshTrigger
+                )
             }
-            Column(modifier = Modifier.weight(1f).padding(8.dp)) {
-                    WeatherScreen(city = selectedCity.value, key = refreshTrigger)
+            Column(Modifier.weight(1f).padding(8.dp)) {
+                selectedLocation?.let {
+                    WeatherScreen(lat = it.lat, lon = it.lon, key = refreshTrigger)
+                }
             }
-            Column(modifier = Modifier.weight(1f).padding(8.dp)) {
+            Column(Modifier.weight(1f).padding(8.dp)) {
                 SettingsScreen(onUnitChanged = { refreshTrigger++ })
             }
         }
@@ -86,9 +111,9 @@ fun MainScreen() {
             }
         ) { innerPadding ->
             NavHost(
-                navController,
+                navController = navController,
                 startDestination = Screen.Search.route,
-                Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding)
             ) {
                 composable(Screen.Search.route) {
                     SearchScreen(navController)
@@ -96,17 +121,21 @@ fun MainScreen() {
                 composable(Screen.Weather.route) {
                     WeatherScreen()
                 }
-                composable(
-                    route = "weather/{cityName}",
-                    arguments = listOf(navArgument("cityName") { type = NavType.StringType })
-                )
-                { backStackEntry ->
-                    val city = backStackEntry.arguments?.getString("cityName")
-                    WeatherScreen(city.toString())
-                }
+
                 composable(Screen.Favourites.route) {
                     FavouritesScreen(navController)
                 }
+
+
+                composable(
+                    route = "weather/{lat}/{lon}",
+                    arguments = listOf(navArgument("lat") { type = NavType.StringType }, navArgument("lon") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull()
+                    val lon = backStackEntry.arguments?.getString("lon")?.toDoubleOrNull()
+                    WeatherScreen(lat = lat, lon = lon)
+                }
+
                 composable(Screen.Settings.route) { SettingsScreen() }
             }
         }
@@ -124,9 +153,10 @@ private fun Content() {
 
 @Composable
 @Preview(showBackground = true)
-fun Preview(){
+fun Preview() {
     Content()
 }
+
 @Composable
 fun AutoRefreshData(context: Context, viewModel: WeatherView) {
     LaunchedEffect(Unit) {
@@ -135,9 +165,9 @@ fun AutoRefreshData(context: Context, viewModel: WeatherView) {
             val last = getLastRefresh(context)
             val currentTime = System.currentTimeMillis()
 
-            if (currentTime - last > interval *  60000) {
+            if (currentTime - last > interval * 60000) {
                 viewModel.refreshFavoritesDataAndDisplayToast(context)
-                Log.e("aa", "auto refreshed data", )
+                Log.d("WeatherApp", "Auto-refreshed favorite cities data")
             }
 
             delay(1000 * 20)

@@ -55,109 +55,73 @@ import androidx.navigation.NavController
 import com.example.weather_app.api.ApiDataGeocoding
 import com.example.weather_app.api.WeatherView
 import com.example.weather_app.ui.theme.DarkBlue3
+import com.example.weather_app.util.LocationData
 import com.example.weather_app.util.Screen
-import com.example.weather_app.util.addCityToSearchHistory
 import com.example.weather_app.util.addFavourite
+import com.example.weather_app.util.addToSearchHistory
 import com.example.weather_app.util.getFavourites
 import com.example.weather_app.util.getOutlinedInputColors
 import com.example.weather_app.util.getSearchHistory
 import com.example.weather_app.util.gradientBackgroundBrush
 import com.example.weather_app.util.mainGradientColors
-import com.example.weather_app.util.removeCityFromSearchHistory
 import com.example.weather_app.util.removeFavourite
+import com.example.weather_app.util.removeFromSearchHistory
 import com.example.weather_app.util.toCityList
 import com.example.weather_app.util.toast
 import kotlinx.coroutines.launch
-
+//        Text("Hello Mati!!!",color = Color.Red, fontSize = 94.sp)
+//            Spacer(modifier = Modifier.height(16.dp))
+//            Text("Miłego dnia!!!",color = Color.Magenta, fontSize = 48.sp)
 
 @Composable
-fun SearchScreen(navController: NavController, onCitySelected: ((String) -> Unit)? = null, onFavouriteToggled: () -> Unit = {}) {
+fun SearchScreen(navController: NavController, onLocationSelected: ((LocationData) -> Unit)? = null, onFavouriteToggled: () -> Unit = {}) {
     val context = LocalContext.current
     var searchHistory by remember { mutableStateOf(getSearchHistory(context)) }
     val viewModel: WeatherView = viewModel()
     val citySuggestions by viewModel.citySuggestions.collectAsState()
 
-    fun redirectToCity(city: String) {
-        val updatedHistory = addCityToSearchHistory(context, city)
+    fun redirectToLocation(location: LocationData) {
+        val updatedHistory = addToSearchHistory(context, location)
         searchHistory = updatedHistory
-        onCitySelected?.invoke(city) ?: navController.navigate("weather/$city") {
+        onLocationSelected?.invoke(location) ?: navController.navigate("weather/${location.lat}/${location.lon}") {
             popUpTo(Screen.Search.route) { inclusive = true }
             launchSingleTop = true
         }
-
     }
 
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(brush = gradientBackgroundBrush(colors = mainGradientColors))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        )
-        {
-//        Text("Hello Mati!!!",color = Color.Red, fontSize = 94.sp)
-//            Spacer(modifier = Modifier.height(16.dp))
-//            Text("Miłego dnia!!!",color = Color.Magenta, fontSize = 48.sp)
-
+    Box(modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors))) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(12.dp))
+            Text("Search for a City", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-            Text("Search for a City", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 14.dp))
-
-            SearchBar(onSearchQueryChange = { query -> viewModel.setSearchQuery(query) } )
-
-            Spacer(modifier = Modifier.height(8.dp))
+            SearchBar { query -> viewModel.setSearchQuery(query) }
 
             if (citySuggestions.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Text("Suggestions", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
-
+                Text("Suggestions", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Column {
-                    citySuggestions.forEach { suggestion ->
-                        SuggestionItem(
-                            suggestion = suggestion,
-                            onClick = {
-                                // Use city name for now, as requested
-                                redirectToCity(suggestion.name)
-                            }
-                        )
+                citySuggestions.forEach { suggestion ->
+                    val location = LocationData(city = suggestion.name, lat = suggestion.lat, lon = suggestion.lon)
+                    SuggestionItem(suggestion = suggestion) {
+                        redirectToLocation(location)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
             if (searchHistory.isNotEmpty()) {
-                Text(
-                    "Recent searches",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("Recent searches", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Column {
-                    searchHistory.map { city ->
-                        SearchHistoryItem(city = city, onClick = {
-                            redirectToCity(city)
-                        }, onRemove = {
-                            searchHistory = getSearchHistory(context)
-                        },onFavouriteToggled = onFavouriteToggled)
-                    }
+                searchHistory.forEach { location ->
+                    SearchHistoryItem(location = location, onClick = { redirectToLocation(location) }, onRemove = { searchHistory = getSearchHistory(context) }, onFavouriteToggled = onFavouriteToggled)
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun SuggestionItem(suggestion: ApiDataGeocoding, onClick: () -> Unit) {
@@ -169,15 +133,12 @@ fun SuggestionItem(suggestion: ApiDataGeocoding, onClick: () -> Unit) {
         append(", ${suggestion.country}")
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.15f)).clickable { onClick() }.padding(12.dp), verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.15f)).clickable { onClick() }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Location", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(24.dp))
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = locationText, color = Color.White, fontSize = 16.sp)
+        Column(modifier = Modifier.weight(1f)) { Text(text = locationText, color = Color.White, fontSize = 16.sp)
             Text( text = "Lat: ${"%.2f".format(suggestion.lat)}, Lon: ${"%.2f".format(suggestion.lon)}", color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
         }
     }
@@ -212,33 +173,14 @@ fun SearchBar(onSearchQueryChange: (String) -> Unit) {
             )
 
         Spacer(modifier = Modifier.height(16.dp))
-
-//        Button(
-//            onClick = {
-//                if (searchQuery.trim().length < 2) {
-//                    isError = true
-//                } else {
-//                    onSearch(searchQuery.trim())
-//                }
-//            },
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = DarkBlue3,
-//                contentColor = Color.White
-//            ),
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            Text( "Search",  fontSize = 22.sp,  fontWeight = FontWeight.SemiBold,  color = Color.White
-//            )
-//        }
     }
 }
-
 @Composable
-fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit, onFavouriteToggled: () -> Unit = {}) {
+fun SearchHistoryItem(location: LocationData, onClick: () -> Unit, onRemove: () -> Unit, onFavouriteToggled: () -> Unit = {}) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var favourites by remember { mutableStateOf(getFavourites(context)) }
-    val isCityInFavourites = favourites.toCityList().contains(city)
+    val isCityInFavourites = favourites.any { it.location == location }
 
     Row(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.1f)).clickable { onClick() }.padding(12.dp),
@@ -250,24 +192,23 @@ fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit, o
         ) {
             Icon( imageVector = Icons.Default.DateRange,  contentDescription = "History",  tint = Color.White.copy(alpha = 0.8f),  modifier = Modifier.size(24.dp) )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = city.capitalize(), color = Color.White, fontSize = 16.sp)
+            Text(text = location.city.capitalize(), color = Color.White, fontSize = 16.sp)
         }
 
         IconButton(
             onClick = {
-                removeCityFromSearchHistory(context, city)
-                onRemove()
-            }
+                removeFromSearchHistory(context, location)
+                onRemove() }
         ) { Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove from history", tint = Color.White.copy(alpha = 0.8f)) }
 
         IconButton(onClick = {
             coroutineScope.launch {
                 if (isCityInFavourites) {
-                    removeFavourite(context, city)
-                    context.toast("Removed ${city.capitalize()} from favourites")
+                    removeFavourite(context, location)
+                    context.toast("Removed ${location.city.capitalize()} from favourites")
                 } else {
-                    addFavourite(context, city)
-                    context.toast("Added ${city.capitalize()} to favourites")
+                    addFavourite(context, location)
+                    context.toast("Added ${location.city.capitalize()} to favourites")
                 }
                 favourites = getFavourites(context)
                 onFavouriteToggled()
@@ -279,3 +220,4 @@ fun SearchHistoryItem(city: String, onClick: () -> Unit, onRemove: () -> Unit, o
     }
     Spacer(modifier = Modifier.height(8.dp))
 }
+

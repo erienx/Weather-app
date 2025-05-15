@@ -93,16 +93,16 @@ class WeatherView : ViewModel() {
 
             val updatedFavorites = mutableListOf<WeatherData>()
             for (weatherData in favourites) {
-                val city = weatherData.city
+                val city = weatherData.location.city
                 try {
                     val currentData = repository.getWeather(city, API_KEY)
                     val forecastData = repository.getForecast(city, API_KEY)
 
-                    updatedFavorites.add(WeatherData(city = city, current = currentData, forecast = forecastData))
+                    updatedFavorites.add(WeatherData(location = weatherData.location, current = currentData, forecast = forecastData))
 
                     Log.e("aa", "updated data")
                 } catch (e: Exception) {
-                    updatedFavorites.add(WeatherData(city = city, current = weatherData.current, forecast = weatherData.forecast))
+                    updatedFavorites.add(WeatherData(location = weatherData.location, current = weatherData.current, forecast = weatherData.forecast))
                     fetchFailed = true
                     Log.e("aa", "kept old data")
                 }
