@@ -86,15 +86,22 @@ fun SearchScreen(navController: NavController, onLocationSelected: ((LocationDat
         }
     }
 
+    val hasError by viewModel.hasFetchError.collectAsState()
+
     Box(modifier = Modifier.fillMaxSize().background(brush = gradientBackgroundBrush(colors = mainGradientColors))) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
 //            Text("Hello Mati!!!",color = Color.Red, fontSize = 94.sp)
 //            Spacer(modifier = Modifier.height(16.dp))
 //            Text("Miłego dnia!!!",color = Color.Magenta, fontSize = 48.sp)
+
             Spacer(modifier = Modifier.height(12.dp))
             Text("Search for a City", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+
             Spacer(modifier = Modifier.height(6.dp))
             SearchBar { query -> viewModel.setSearchQuery(query) }
+            if (hasError && citySuggestions.isEmpty()) {
+                Text("Failed to fetch suggestions. Check your internet connection.", color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(bottom = 8.dp))
+            }
 
             if (citySuggestions.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))

@@ -20,15 +20,10 @@ class WeatherRepository {
         return api.getForecast(city, key)
     }
     suspend fun getCitySuggestions(query: String, key: String): List<ApiDataGeocoding> {
-        return if (query.length >= 2) {
-            try {
-                api.getCitiesByName(query, 5, key)
-            } catch (e: Exception) {
-                emptyList()
-            }
-        } else {
-            emptyList()
+        if (query.length < 2) {
+            return emptyList()
         }
+        return api.getCitiesByName(query, 5, key)
     }
     suspend fun getCurrentByCoords(lat: Double, lon: Double, key: String): ApiDataCurrent{
         return api.getCurrentWeatherByCoords(lat,lon, key)

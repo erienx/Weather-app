@@ -31,6 +31,7 @@ class WeatherView : ViewModel() {
     private val searchQuery = MutableStateFlow("")
 
     private var searchJob: Job? = null
+    public val hasFetchError = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
@@ -55,8 +56,11 @@ class WeatherView : ViewModel() {
             try {
                 val suggestions = repository.getCitySuggestions(query, API_KEY)
                 citySuggestions.value = suggestions
+                hasFetchError.value = false
             } catch (e: Exception) {
                 citySuggestions.value = emptyList()
+                hasFetchError.value = true
+                Log.e("aaaa", "true")
             }
         }
     }
